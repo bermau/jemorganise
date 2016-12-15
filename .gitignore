@@ -1,3 +1,8 @@
+# BM: 
+conf_file.py
+essai_*
+tempo.sqlite
+PRIVATE/
 # Byte-compiled / optimized / DLL files
 __pycache__/
 *.py[cod]
