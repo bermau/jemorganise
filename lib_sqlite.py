@@ -2,12 +2,11 @@
 # Gestion des connexions à une base sqlite.
 # Evolution : Remplacement de basDonn par con.
 
-
 import sqlite3
 import os, sys
 import conf_file as Cf # fichier de parametrage avec nom de la base sqlite
 
-class GestionBD:
+class Gestion_BD:
     """Mise en place et interfaçage d'une base de données Sqlite."""
 
     def __init__(self, db_name=None, in_memory=False):
@@ -27,13 +26,14 @@ class GestionBD:
                 self.con = sqlite3.connect(db_name)
             except Exception as err:
                 sys.stderr.write(('Connexion to database failed :\n'\
-                      'SQL Error is :\n%s' % err))           
+                      'Connexion rrror is :\n%s' % err))           
                 self.echec = 1
             else:
                 # print("Connexion OK") 
                 self.cur = self.con.cursor()   # création du curseur
                 self.echec = 0
-    def creer_tables(self, dic_tables):
+                
+    def create_tables(self, dic_tables=Cf.dic_tables):
         "Création des tables décrites dans le dictionnaire <dic_tables>."
         for table in dic_tables:            # parcours des clés du dictionn.
             req = "CREATE TABLE %s (" % table
@@ -47,7 +47,7 @@ class GestionBD:
                     typeChamp ='REAL'
                 elif tch =='k':
                     # champ 'clé primaire' (entier incrémenté automatiquement)
-                    #typeChamp ='SERIAL'
+                    # typeChamp ='SERIAL'
                     typeChamp ='INTEGER NOT NULL'
                     pk = nomChamp
                 else:
@@ -60,14 +60,15 @@ class GestionBD:
             self.executer_sql(req)
             print ("Fin de la création des tables")
 
-    def supprimer_tables(self, dic_tables):
+    def suppress_tables(self, dic_tables=Cf.dic_tables):
         "Suppression de toutes les tables décrites dans <dic_tables>"
         for table in list(dic_tables.keys()):
             req ="DROP TABLE %s" % table
             self.executerReq(req)
         self.commit()                       # transfert -> disque
         print ("Fin de la destruction des tables")
-    def executer_sql(self, req, param =None):
+        
+    def execute_sql(self, req, param =None):
         "Exécution de la requête <req>, avec détection d'erreur éventuelle."
         try:
             # obligé de faire cette bidouille infame ! Je dois améliorer le
@@ -84,7 +85,7 @@ class GestionBD:
         else:
             return 1
 
-    def resultat_req(self):
+    def get_curs_result(self):
         "renvoie le résultat de la requête précédente (une liste de tuples)"
         return self.cur.fetchall()
 
@@ -116,22 +117,37 @@ class GestionBD:
             self.con.close()
             # sys.stderr.write("Database {} has been closed\n".format(self.db_name))
 class Enregistreur:
-    """classe pour gérer l'entrée d'enregistrements divers"""
+    """Gérer l'entrée d'enregistrements divers"""
     def __init__(self, bd, table):
         self.bd =bd
         self.table =table
-        self.descriptif =Glob.dicoTables[table]   # descriptif des champs
-
+        self.descriptif =Cf.dic_tables[table]   # descriptif des champs
+    def prt_label(self, label):
+        print(label)
+    def prt_value(self, field_name, cursor):
+        print(cursor.fetchone()[field_name])
+        
+    def display(self, record_id):
+        sql = "SELECT * from ? WHERE id= ? "
+        self.bd.execute_sql(sql, (table, record_id))
+        cursor=self.cur
+        for field_name, type, label in self.descriptif:
+            self.prt_label(label)
+            self.prt_value(type,field_name, self.cur)
+        print()
+        
+        
     def entrer(self):
         "procédure d'entrée d'un enregistrement entier"
         str_champs ="("           # ébauche de chaîne pour les noms de champs
         valeurs =[]           # liste pour les valeurs correspondantes
         # Demander successivement une valeur pour chaque champ :
-        for cha, type, nom in self.descriptif:
+        for field_name, type, label in self.descriptif:
             if type =="k":    # on ne demandera pas le n° d'enregistrement
                 continue      # à l'utilisateur (numérotation auto.)
-            str_champs = str_champs + cha + ","
-            val = input("Entrez le champ %s :" % nom)
+            str_champs = str_champs + field_name + ","
+            
+            val = input("Entrez le champ %s :" % label)
             if type =="i":
                 val =int(val)
             valeurs.append(val)
@@ -147,7 +163,7 @@ class Enregistreur:
         str_champs = str_champs[:-1] + ")"    # supprimer la dernière virgule,
         balises = balises[:-1] + ")"  # et ajouter une parenthèse
         req ="INSERT INTO %s %s VALUES %s" % (self.table, str_champs, balises)
-        self.bd.executerReq(req, valeurs)
+        self.bd.execute_sql(req, valeurs)
 
         ch =input("Continuer (O/N) ? ")
         if ch.upper() == "O":
@@ -157,7 +173,7 @@ class Enregistreur:
         
 if __name__ == '__main__': 
     print("Connexion à base de donnée")
-    BASE = GestionBD(db_name=Cf.FACT_DB)
+    BASE = Gestion_BD(db_name=Cf.FACT_DB)
     if BASE.echec:
         print("Pb connexion")
     else:
@@ -169,6 +185,6 @@ if __name__ == '__main__':
     # BASE.close()
 
     # Autre exemple avec une base en mémoire RAM.
-    INRAM=GestionBD(in_memory=True)
+    INRAM=Gestion_BD(in_memory=True)
     INRAM.quick_sql("Select 1,2,3 ")
     
