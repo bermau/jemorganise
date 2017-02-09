@@ -3,6 +3,40 @@
 import os, shutil
 import lib_tree
 
+
+class Observable:
+    def __init__(self, initialValue=None):
+        self.data = initialValue
+        self.callbacks = {}
+
+    def addCallback(self, func):
+        print("passage par addCallback")
+        self.callbacks[func] = 1
+
+##    def delCallback(self, func):
+##        del self.callback[func]
+
+    def _docallbacks(self):
+        for func in self.callbacks:
+             
+             print("passage par _docallbacks")
+             print(self.callbacks)
+             func(self.data)
+
+    def set(self, data):
+        print("passage par set")          
+        self.data = data
+        self._docallbacks()
+
+    def get(self):
+        print("passage par get") 
+        return self.data
+
+    def unset(self):
+        print("passage par unset") 
+        self.data = None
+
+
 class FsHandler():
     def __init__(self, root="PRIVATE/"):
         self.root=root
@@ -87,6 +121,7 @@ class Controller():
     def __init__(self):
         self.model=FsHandler()
         self.view1=Menu()
+        while 
         
     def mkdir(self, name):
         self.model.mkdir(name)
@@ -94,14 +129,14 @@ class Controller():
     def bm_mkdir(self, name_rep):
         self.model.bm_mkdir(name_rep)
     def prt_dir(self):
-        """print directory"""
-        for item in os.listdir(self.root):
-            print(item)
+        self.model.prt_dir()
+        
             
     def prt_tree(self):
-        lib_tree.tree(self.root, " ", True)
+        self.model.prt_tree()
        
     def move_rep(self, src, dst):
+        
 
     
      
