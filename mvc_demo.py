@@ -32,6 +32,8 @@
 ##
 ## following is a Tkinter approximation of the original example.
 
+# BM a ajouté quelques explications
+
 import tkinter as tk
 
 
@@ -47,13 +49,14 @@ class Observable:
     def delCallback(self, func):
         del self.callback[func]
 
+    # fonction appelée après un set.
+    # lance les notifications aux observateurs.
     def _docallbacks(self):
-        for func in self.callbacks:
-             
+        for func in self.callbacks:             
              print("passage par _docallbacks")
              print(self.callbacks)
              func(self.data)
-
+    # La fonction set appelle les callbacks.
     def set(self, data):
         print("passage par set")          
         self.data = data
@@ -104,6 +107,16 @@ class ChangerWidget(tk.Toplevel):
 class Controller:
     def __init__(self, root):
         self.model = Model()
+        # Sur l'oject myMoney du model, on ajoute un callback : cette
+        # fonction du controlleur sera appellée après une mise à jour du modèle
+        # On passe la référence de cette fonction, qui est ici une
+        # fonction du controlleur. Cette fonction est stockée (dans un dico)
+        # par un objet qui n'est pas de la classe du controleur, mais
+        # qui est de la classe du modèle.
+
+        # Autrement dit : on dit à un des objets du modèle de prévenir le
+        # controlleur quand il a été mis à jour.
+        
         self.model.myMoney.addCallback(self.MoneyChanged)
         self.view1 = View(root)
         self.view2 = ChangerWidget(self.view1)

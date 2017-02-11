@@ -1,8 +1,6 @@
-# Un essai
-
+# Un essai  de gestionnaire d'arborescence.
 import os, shutil
 import lib_tree
-
 
 class Observable:
     def __init__(self, initialValue=None):
@@ -18,7 +16,6 @@ class Observable:
 
     def _docallbacks(self):
         for func in self.callbacks:
-             
              print("passage par _docallbacks")
              print(self.callbacks)
              func(self.data)
@@ -36,15 +33,20 @@ class Observable:
         print("passage par unset") 
         self.data = None
 
-
 class FsHandler():
     def __init__(self, root="PRIVATE/"):
         self.root=root
+        self.notification = Observable("")
+        
+    def bidon(self):
+        print("passé par bidon")
+        self.notification.set("OK bidon")
 
     def mkdir(self, name):
         """make a directory"""
         try:
             os.mkdir(os.path.join(self.root,name))
+            self.notification.set("repertoire créé")
         except:
             print("Impossible de créer '%s'" % name)
     def bm_mkdir(self, name_rep):
@@ -81,13 +83,12 @@ class FsHandler():
         with open (src+"/memo.txt", mode='w') as f:
             f.write("contenu déplacé dans : %s" % dst)
             
-
 class Menu():
     def __init__(self):
-        key = ""
-        while  key != "q":
-            
-            print("""
+        self.requested_command = Observable("")
+
+    def prt_menu(self):
+        print("""
 
 c) créer un répertoire essai
 m) transférer un répertoire
@@ -96,12 +97,80 @@ l) list repertories
 t) print tree 
 q) quitter
 """)
+        return input("choix : ")
+        
+    def decode(self, key):
+        return key
+##            if key == "c":
+##                name = input("Nom du répertoire : ")
+##                self.requested_command.set(fs.mkdir, name)
+##            if key == "b": # B comme BIDON
+##                self.requested_command.set("b")
+##            elif key == "m":
+##                src = input("Origine : ")
+##                dst = input("Destination : ")
+##                fs.move_rep(src, dst)
+##            elif key == "s":
+##                name = input("Nom du répertoire : ")
+##                fs.bm_mkdir(name)   
+##            elif key == "l":
+##                fs.prt_dir()
+##            elif key == "t":
+##                fs.prt_tree()
+##            else:
+##                print("Choix non prévu")
+                
+    def update(self):
+        print("Quelqhe chose est nouveau")
+    
+                
+class Controller():
+    def __init__(self):
+        self.model=FsHandler()
+        self.view=Menu()
+        self.model.notification.addCallback(self.updateview)
+        self.mainloop()
+        
+    def mainloop(self):
+        cont_while = True
+        while cont_while:
+            self.view.decode(self.view.prt_menu())
+            key = self.view.requested_command.get()
+            print("key", key)
+            if key == "b":
+                self.bidon()
+            elif key == "t":
+                self.prt_tree()
+            else:
+                print("Choix non prévu")            
+                
+    def updateview(self, a=None): # Je suis obligé de mettre ce second argument
+        self.view.update()
+        
+    def bidon(self):
+        print("Passage par controller.bidon()")
+        self.model.bidon()            
+        
+    def mkdir(self, name):
+        self.model.mkdir(name)
+
+    def bm_mkdir(self, name_rep):
+        self.model.bm_mkdir(name_rep)
+        
+    def prt_dir(self):
+        self.model.prt_dir()
+            
+    def prt_tree(self):
+        self.model.prt_tree()
+       
+    def move_rep(self, src, dst):
+        self.model.move_rep(src, dst)
+        
+    def decode_view(self):       
             fs = FsHandler()
             key = input("choix : ")
-
             if key == "c":
-                name = input("Nom du répertoire : ")
-                
+                name = input("Nom du répertoire : ")             
                 fs.mkdir(name)
             elif key == "m":
                 src = input("Origine : ")
@@ -116,30 +185,7 @@ q) quitter
                 fs.prt_tree()
             else:
                 print("Choix non prévu")
-                
-class Controller():
-    def __init__(self):
-        self.model=FsHandler()
-        self.view1=Menu()
-        while 
-        
-    def mkdir(self, name):
-        self.model.mkdir(name)
 
-    def bm_mkdir(self, name_rep):
-        self.model.bm_mkdir(name_rep)
-    def prt_dir(self):
-        self.model.prt_dir()
-        
-            
-    def prt_tree(self):
-        self.model.prt_tree()
-       
-    def move_rep(self, src, dst):
-        
-
-    
-     
 if __name__ == '__main__':
 ##    fs = FsHandler()
 ##    fs.mkdir("tutu")
