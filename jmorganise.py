@@ -102,12 +102,14 @@ class Controller():
         lib_tree.tree(self.root, " ", True)
        
     def move_rep(self, src, dst):
+        pass
 
-    
      
 if __name__ == '__main__':
+    
+    Controller()
 ##    fs = FsHandler()
 ##    fs.mkdir("tutu")
 ##    fs.bm_mkdir("tutu")
 ##    Menu()
-    Controller()
+
