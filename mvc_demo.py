@@ -48,8 +48,7 @@ class Observable:
         del self.callback[func]
 
     def _docallbacks(self):
-        for func in self.callbacks:
-             
+        for func in self.callbacks: 
              print("passage par _docallbacks")
              print(self.callbacks)
              func(self.data)
@@ -104,7 +103,7 @@ class ChangerWidget(tk.Toplevel):
 class Controller:
     def __init__(self, root):
         self.model = Model()
-        self.model.myMoney.addCallback(self.MoneyChanged)
+        self.model.myMoney.  (self.MoneyChanged)
         self.view1 = View(root)
         self.view2 = ChangerWidget(self.view1)
         self.view2.addButton.config(command=self.AddMoney)
